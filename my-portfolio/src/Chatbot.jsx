@@ -4,14 +4,14 @@ import axios from 'axios';
 const Chatbot = ({ isDark }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { sender: 'bot', text: 'Hey there! I’m Jarvis, How may i help you today?' }
+    { sender: 'bot', text: 'Hey there! I’m Jarvis, How may I help you today?' }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const chatBodyRef = useRef(null);
 
   const toggleChatbot = () => {
-    console .log('Toggling chatbot, current isOpen:', isOpen);
+    console.log('Toggling chatbot, current isOpen:', isOpen);
     setIsOpen(!isOpen);
   };
 
@@ -24,24 +24,20 @@ const Chatbot = ({ isDark }) => {
     setIsTyping(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/chat', {
-        messages: [
-          { role: 'system', content: 'You are Jarvis, a helpful and friendly AI assistant created by Saim Khan for his portfolio app.' },
-          ...messages.map((msg) => ({
-            role: msg.sender === 'user' ? 'user' : 'assistant',
-            content: msg.text
-          })),
-          { role: 'user', content: input }
-        ]
+      // const response = await axios.post('https://saimkhan1124.app.n8n.cloud/webhook-test/personalAssist', {
+        const response = await axios.post('https://saimkhan1124.app.n8n.cloud/webhook/personalAssist', {
+          // const response = await axios.post('https://proxpire.com/webhook-test/personalAssist', {
+        message: input
       });
-      const botResponse = response.data.message;
-      console.log ('gptresopnse',response)
+
+      const botResponse = response.data[0].output || 'No response from bot.';
+      console.log('n8n response', response);
       setMessages((prev) => [...prev, { sender: 'bot', text: botResponse }]);
     } catch (error) {
-      console.error('Error calling backend:', error.response ? error.response.data : error.message);
+      console.error('Error calling webhook:', error.response ? error.response.data : error.message);
       setMessages((prev) => [
         ...prev,
-        { sender: 'bot', text: `Error: ${error.response?.data?.error || 'Failed to connect to backend. Check if the server is running.'}` }
+        { sender: 'bot', text: `Error: ${error.response?.data?.error || 'Failed to connect to webhook.'}` }
       ]);
     } finally {
       setIsTyping(false);
@@ -108,7 +104,7 @@ const Chatbot = ({ isDark }) => {
           </div>
           <div className="p-4 border-t border-pink-300/20 dark:border-cyan-700/20">
             <input
-              type="text" 
+              type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
